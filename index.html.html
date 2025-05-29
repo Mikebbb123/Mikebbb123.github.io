@@ -1,0 +1,2191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Third Crusade - Interactive History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glow-shadow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        .hero-text {
+            font-size: clamp(4rem, 8vw, 12rem);
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        .parallax-bg {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .timeline-line {
+            background: linear-gradient(to bottom, #3b82f6, #60a5fa);
+        }
+        network-node {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.network-node:hover {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+.network-link {
+    transition: all 0.3s ease;
+}
+
+.network-link:hover {
+    stroke-width: 6 !important;
+    opacity: 1 !important;
+}
+
+#character-info {
+    min-height: 200px;
+    transition: all 0.3s ease;
+}
+    .map-tab-btn {
+        transition: all 0.3s ease;
+    }
+
+    .map-tab-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .location-btn:hover {
+        transform: translateX(4px);
+    }
+
+    .map-frame {
+        transition: opacity 0.3s ease;
+    }
+
+    #location-info {
+        transition: transform 0.2s ease;
+    }
+
+    .battle-marker {
+        transition: all 0.3s ease;
+    }
+
+    .battle-marker:hover {
+        r: 10;
+        filter: drop-shadow(0 0 6px rgba(0,0,0,0.3));
+    }
+
+    .legend text {
+        font-size: 12px;
+    }
+
+/* 横向时间轴样式 - 添加到你的CSS中 */
+.horizontal-timeline {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 60px 0;
+    scroll-behavior: smooth;
+}
+
+.timeline-line-horizontal {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #3b82f6, #60a5fa);
+    transform: translateY(-50%);
+    border-radius: 2px;
+    z-index: 1;
+}
+
+.timeline-container-horizontal {
+    display: flex;
+    position: relative;
+    min-width: max-content;
+    padding: 0 50px;
+    gap: 120px;
+    align-items: center;
+}
+
+.timeline-item-horizontal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    min-width: 280px;
+    transition: all 0.5s ease;
+    opacity: 0.7;
+}
+
+.timeline-item-horizontal.active {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.timeline-item-horizontal.active .card-hover {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+    border: 2px solid #3b82f6;
+}
+
+.timeline-dot-horizontal {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 4px solid white;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    cursor: pointer;
+}
+
+.timeline-dot-horizontal:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.timeline-card-top {
+    margin-bottom: 160px;
+    transform: translateY(-10px);
+}
+
+.timeline-card-bottom {
+    margin-top: 160px;
+    transform: translateY(10px);
+}
+
+.timeline-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+}
+
+.timeline-card::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+}
+
+.timeline-card-top::before {
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid white;
+}
+
+.timeline-card-bottom::before {
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid white;
+}
+
+.scroll-indicator {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(59, 130, 246, 0.1);
+    border: 2px solid #3b82f6;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .timeline-container-horizontal {
+        gap: 80px;
+        padding: 0 20px;
+    }
+    
+    .timeline-item-horizontal {
+        min-width: 220px;
+    }
+    
+    .timeline-card {
+        padding: 16px;
+        min-height: 120px;
+    }
+}
+
+@media (max-width: 640px) {
+    .horizontal-timeline {
+        padding: 20px 0;
+    }
+    
+    .timeline-line-horizontal {
+        display: none;
+    }
+    
+    .timeline-container-horizontal {
+        flex-direction: column;
+        gap: 40px;
+        padding: 0 20px;
+        min-width: auto;
+    }
+    
+    .timeline-item-horizontal {
+        flex-direction: row;
+        min-width: 100%;
+        max-width: 100%;
+    }
+    
+    .timeline-card-top,
+    .timeline-card-bottom {
+        margin: 0 0 0 20px;
+        transform: none;
+    }
+    
+    .timeline-card::before {
+        display: none;
+    }
+    
+    .scroll-indicator {
+        display: none;
+    }
+}
+/* 最简洁版本 - 完全没有移动和缩放效果 */
+
+.timeline-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+/* 只改变颜色和阴影，不移动卡片 */
+.timeline-card:hover {
+    border: 2px solid #3b82f6 !important;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3) !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+}
+
+/* 点击时轻微缩小表示响应 */
+.timeline-card:active {
+    transform: scale(0.98);
+}
+
+/* 活跃状态 */
+.timeline-item-horizontal.active .timeline-card {
+    border: 2px solid #3b82f6 !important;
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.5) !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+}
+
+/* 去掉所有::after和::before伪元素 */
+.timeline-card::after,
+.timeline-card::before {
+    display: none;
+}
+/* 响应式地图高度调整 */
+@media (max-width: 1024px) {
+    #interactive-map .relative.rounded-xl.overflow-hidden {
+        height: 700px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #interactive-map .relative.rounded-xl.overflow-hidden {
+        height: 600px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #interactive-map .relative.rounded-xl.overflow-hidden {
+        height: 500px !important;
+    }
+}   
+</style>
+</head>
+<body class="parallax-bg overflow-x-hidden">
+    <!-- Hero Section -->
+    <section id="hero" class="min-h-screen flex items-center justify-center relative">
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-50 to-blue-50 opacity-80"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center space-y-8">
+                <h1 class="hero-text font-black leading-none tracking-tight">
+                    The Third Crusade
+                </h1>
+                <div class="text-2xl md:text-4xl font-light text-slate-600 space-y-2">
+                    <p>1189 - 1192</p>
+                    <p class="text-lg md:text-xl">The Kings' Crusade</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 max-w-4xl mx-auto">
+                    <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 glow-shadow card-hover">
+                        <h3 class="font-bold text-slate-700">Zhengbo Shen</h3>
+                        <p class="text-slate-500">1306218</p>
+                    </div>
+                    <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 glow-shadow card-hover">
+                        <h3 class="font-bold text-slate-700">Jianhao Wang</h3>
+                        <p class="text-slate-500">1306015</p>
+                    </div>
+                    <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 glow-shadow card-hover">
+                        <h3 class="font-bold text-slate-700">Kaile Qu</h3>
+                        <p class="text-slate-500">1306182</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <i class="fas fa-chevron-down text-3xl text-blue-500"></i>
+        </div>
+    </section>
+    
+
+    <!-- Contents Overview -->
+    <section id="contents" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-6xl md:text-8xl font-black text-center mb-16 text-slate-800">CONTENTS</h2>
+             <p class="text-xl text-center text-slate-600 mb-12">
+                  You can click on the card to get to any part you want.
+             </p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-3xl p-8 glow-shadow card-hover">
+                     <a href="#background" class="block h-full">
+                         <div class="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fas fa-scroll text-white text-2xl"></i>
+                         </div>
+                         <h3 class="text-2xl font-bold mb-4 text-slate-800">Cause and Background</h3>
+                         <p class="text-slate-600">The events leading to the Third Crusade</p>
+                     </a>
+                </div>
+                <div class="bg-white rounded-3xl p-8 glow-shadow card-hover">
+                     <a href="#timeline" class="block h-full">
+                             <div class="w-16 h-16 bg-indigo-500 rounded-2xl flex items-center justify-center mb-6">
+                                   <i class="fas fa-clock text-white text-2xl"></i>
+                             </div>
+                             <h3 class="text-2xl font-bold mb-4 text-slate-800">Crusade Timeline</h3>
+                             <p class="text-slate-600">Interactive chronology of key events</p>
+                     </a>
+                </div>
+                <div class="bg-white rounded-3xl p-8 glow-shadow card-hover">
+                    <a href="#interactive-map" class="block h-full">
+                        <div class="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center  mb-6">
+                             <i class="fas fa-map-marked-alt text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-slate-800">Interactive Map</h3>
+                        <p class="text-slate-600">Explore routes and battle locations</p>
+                     </a> 
+                </div>
+
+                <div class="bg-white rounded-3xl p-8 glow-shadow card-hover">
+                    <a href="#characters" class="block h-full">
+                        <div class="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center  mb-6">
+                            <i class="fas fa-crown text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-slate-800">Main Characters</h3>
+                        <p class="text-slate-600">Key figures and specific processes</p>
+                     </a> 
+                </div>
+                 <div class="bg-white rounded-3xl p-8 glow-shadow card-hover">
+                     <a href="#character-network" class="block h-full">
+                         <div class="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fas fa-user-friends text-white text-2xl"></i>
+                         </div>
+                         <h3 class="text-2xl font-bold mb-4 text-slate-800">Character Network</h3>
+                         <p class="text-slate-600">The events leading to the Third Crusade</p>
+                     </a>
+                </div>
+                <div class="bg-white rounded-3xl p-8 glow-shadow card-hover">
+                      <a href="#influence" class="block h-full">
+                           <div class="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mb-6">
+                               <i class="fas fa-globe text-white text-2xl"></i>
+                           </div>
+                           <h3 class="text-2xl font-bold mb-4 text-slate-800">Historical Influence</h3>
+                           <p class="text-slate-600">Long-term impact and legacy</p>
+                       </a>
+                  </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider my-16"></div>
+
+    <!-- Cause and Background -->
+    <section id="background" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-7xl md:text-9xl font-black text-center mb-20 text-slate-800">
+                CAUSE & BACKGROUND
+            </h2>
+            <p class="text-xl text-center text-slate-600 mb-12">
+                   You can click on the card to see the futher information.
+            </p>
+            <!-- 1187 Fall of Jerusalem -->
+            <div class="mb-20">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-8">
+                        <div class="text-8xl font-black text-blue-600">1187</div>
+                        <h3 class="text-4xl font-bold text-slate-800">The Fall of Jerusalem</h3>
+                        <div class="space-y-6">
+                            <div class="bg-white rounded-2xl p-6 card-hover cursor-pointer"  onclick="showDetailModal('saladin')">
+                                <h4 class="text-xl font-bold mb-3 text-slate-800">Saladin's Strategic March</h4>
+                                <p class="text-slate-600">In the summer of 1187, Arab Saladin led 60,000 troops from Aleppo to attack Palestine. He defeated the troops of the Kingdom of Jerusalem at Lake Tabaret and Ascalon, gradually approaching Jerusalem.</p>
+                            </div>
+                            <div class="bg-white rounded-2xl p-6 card-hover cursor-pointer" onclick="showDetailModal('hattin')">
+                                <h4 class="text-xl font-bold mb-3 text-slate-800">The Fatal Blow of Hattin</h4>
+                                <p class="text-slate-600">At the Battle of Hattin, Saladin's army dealt a fatal blow to the troops of the Kingdom of Jerusalem, laying the foundation for the subsequent capture of Jerusalem.</p>
+                            </div>
+                            <div class="bg-white rounded-2xl p-6 card-hover cursor-pointer" onclick="showDetailModal('shock')">
+                                <h4 class="text-xl font-bold mb-3 text-slate-800">European Shock</h4>
+                                <p class="text-slate-600">When news of the fall of Jerusalem returned to Europe, it caused great shock and panic, becoming the direct fuse for the Third Crusade.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl p-8 h-96 flex items-center justify-center">
+                        <div class="text-center">
+                            <img src="https://th.bing.com/th/id/OIP.o0ahubRln1Y_2kE6j4ac9QHaE8?w=276&h=184&c=7&r=0&o=5&dpr=2&pid=1.7" alt="Jerusalem" class="w-full h-64 object-cover rounded-2xl mx-auto mb-4">
+                            <div class="text-xl font-bold text-slate-700">Jerusalem</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pope's Emergency Mobilization -->
+            <div class="mb-20">
+                <div class="bg-white rounded-3xl p-12 glow-shadow">
+                    <h3 class="text-5xl font-bold mb-8 text-center text-slate-800">The Pope's Emergency Mobilization Order</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="text-center cursor-pointer card-hover" onclick="showDetailModal('genoese-ships')">
+                            <div class="w-20 h-20 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-ship text-white text-2xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold mb-3 text-slate-800">Genoese Merchant Ships</h4>
+                            <p class="text-slate-600">Some Genoese merchants brought the news of the fall of Jerusalem back to Rome, making Europe aware of this major change.</p>
+                        </div>
+                        <div class="text-center cursor-pointer card-hover" onclick="showDetailModal('gregory-decision')">
+                            <div class="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-cross text-white text-2xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold mb-3 text-slate-800">Gregory VIII's Decision</h4>
+                            <p class="text-slate-600">The new Pope Gregory VIII issued the order to launch the crusade in the following spring, urgently mobilizing European forces.</p>
+                        </div>
+                        <div class="text-center cursor-pointer card-hover" onclick="showDetailModal('historical-significance')">
+                            <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-flag text-white text-2xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold mb-3 text-slate-800">Historical Significance</h4>
+                            <p class="text-slate-600">This mobilization order prompted various European countries to respond, providing important religious and political support.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Three Kings Alliance -->
+            <div class="mb-20">
+                <h3 class="text-5xl font-bold mb-12 text-center text-slate-800">The Interest Map of the Three Kings' Alliance</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                     <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-3xl p-8 card-hover cursor-pointer" onclick="showKingDetail('frederick')">
+                        <div class="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fas fa-eagle text-white text-2xl"></i>
+                        </div>
+                        <h4 class="text-2xl font-bold mb-4 text-slate-800">Frederick I's Ambition</h4>
+                        <p class="text-slate-600">Holy Roman Emperor Frederick I organized a crusade of nearly 100,000 men (about 20,000 fighters), hoping to expand influence and demonstrate strength.</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 card-hover cursor-pointer" onclick="showKingDetail('richard')">
+                        <div class="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fas fa-lion text-white text-2xl"></i>
+                        </div>
+                        <h4 class="text-2xl font-bold mb-4 text-slate-800">Richard I's Glory</h4>
+                        <p class="text-slate-600">King Richard I of England participated in the eastern expedition, responding to the pope's call while pursuing personal glory and European prestige.</p>
+                    </div>
+                     <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-3xl p-8 card-hover cursor-pointer" onclick="showKingDetail('philip')">
+                        <div class="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fas fa-fleur-de-lis text-white text-2xl"></i>
+                        </div>
+                        <h4 class="text-2xl font-bold mb-4 text-slate-800">Philip II's Strategy</h4>
+                        <p class="text-slate-600">King Philip II of France had his own political and strategic considerations, involving territorial expansion and enhancing his voice in European affairs.</p>
+                    </div>
+                </div>
+            </div>
+        <p class="mt-8 text-center">
+            <a href="#contents" class="text-blue-500 hover:underline">← Back to the Content</a>
+        </p>
+        </div>
+    </section>
+    
+    <div class="section-divider my-16"></div>
+    <!-- Timeline Section -->
+    <section id="timeline" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-7xl md:text-9xl font-black text-center mb-20 text-slate-800">
+                TIMELINE
+            </h2>
+            
+            <!-- Timeline Introduction -->
+            <div class="bg-white rounded-3xl p-8 glow-shadow mb-12">
+                <h3 class="text-3xl font-bold mb-6 text-center text-slate-800">The Crusade Chronicle</h3>
+                <p class="text-slate-600 text-center text-lg leading-relaxed max-w-4xl mx-auto">
+                    Follow the dramatic events of the Third Crusade from the shocking fall of Jerusalem to the final treaty between Richard and Saladin. Click on any event to explore detailed information about these pivotal moments in medieval history.
+                </p>
+            </div>
+
+            <!-- Horizontal Timeline -->
+            <div class="horizontal-timeline relative" id="timelineContainer">
+                <div class="timeline-container-horizontal">
+                    <div class="timeline-line-horizontal" id="timelineLine"></div>
+                    <!-- Timeline Item 1: Battle of Hattin -->
+                    <div class="timeline-item-horizontal" data-year="1187" data-event="Battle of Hattin">
+                        <div class="timeline-card timeline-card-top card-hover">
+                            <div class="text-xl font-bold text-red-600 mb-2">July 4, 1187</div>
+                            <div class="text-lg font-semibold mb-2">Battle of Hattin</div>
+                            <p class="text-slate-600 text-sm">Saladin's decisive victory over Crusader forces</p>
+                        </div>
+                        <div class="timeline-dot-horizontal bg-red-500"></div>
+                    </div>
+                    <!-- Timeline Item 2: Fall of Jerusalem -->
+                    <div class="timeline-item-horizontal" data-year="1187" data-event="Fall of Jerusalem">
+                        <div class="timeline-dot-horizontal bg-red-600"></div>
+                        <div class="timeline-card timeline-card-bottom card-hover">
+                            <div class="text-xl font-bold text-red-600 mb-2">Oct 2, 1187</div>
+                            <div class="text-lg font-semibold mb-2">Fall of Jerusalem</div>
+                            <p class="text-slate-600 text-sm">Saladin recaptures the Holy City</p>
+                        </div>
+                    </div>
+                    <!-- Timeline Item 3: Papal Call -->
+                    <div class="timeline-item-horizontal" data-year="1187" data-event="Papal Call to Arms">
+                        <div class="timeline-card timeline-card-top card-hover">
+                            <div class="text-xl font-bold text-purple-600 mb-2">Oct 29, 1187</div>
+                            <div class="text-lg font-semibold mb-2">Papal Call to Arms</div>
+                            <p class="text-slate-600 text-sm">Pope Gregory VIII issues crusade call</p>
+                        </div>
+                        <div class="timeline-dot-horizontal bg-purple-500"></div>
+                    </div>
+                    <!-- Timeline Item 4: Frederick Departs -->
+                    <div class="timeline-item-horizontal" data-year="1189" data-event="Frederick I Departs">
+                        <div class="timeline-dot-horizontal bg-orange-500"></div>
+                        <div class="timeline-card timeline-card-bottom card-hover">
+                            <div class="text-xl font-bold text-orange-600 mb-2">May 11, 1189</div>
+                            <div class="text-lg font-semibold mb-2">Frederick I Departs</div>
+                            <p class="text-slate-600 text-sm">Holy Roman Emperor begins his march</p>
+                        </div>
+                    </div>
+                    <!-- Timeline Item 5: Richard Crowned -->
+                    <div class="timeline-item-horizontal" data-year="1189" data-event="Richard I Crowned">
+                        <div class="timeline-card timeline-card-top card-hover">
+                            <div class="text-xl font-bold text-blue-600 mb-2">Sep 3, 1189</div>
+                            <div class="text-lg font-semibold mb-2">Richard I Crowned</div>
+                            <p class="text-slate-600 text-sm">Richard becomes King of England</p>
+                        </div>
+                        <div class="timeline-dot-horizontal bg-blue-500"></div>
+                    </div>
+                    <!-- Timeline Item 6: Frederick Dies -->
+                    <div class="timeline-item-horizontal" data-year="1190" data-event="Frederick I Dies">
+                        <div class="timeline-dot-horizontal bg-gray-500"></div>
+                        <div class="timeline-card timeline-card-bottom card-hover">
+                            <div class="text-xl font-bold text-gray-600 mb-2">June 10, 1190</div>
+                            <div class="text-lg font-semibold mb-2">Frederick I Dies</div>
+                            <p class="text-slate-600 text-sm">Barbarossa drowns in Saleph River</p>
+                        </div>
+                    </div>
+                    <!-- Timeline Item 7: Kings Depart -->
+                    <div class="timeline-item-horizontal" data-year="1190" data-event="Kings Depart for East">
+                        <div class="timeline-card timeline-card-top card-hover">
+                            <div class="text-xl font-bold text-indigo-600 mb-2">July 4, 1190</div>
+                            <div class="text-lg font-semibold mb-2">Kings Depart for East</div>
+                            <p class="text-slate-600 text-sm">Richard and Philip sail from France</p>
+                        </div>
+                        <div class="timeline-dot-horizontal bg-indigo-500"></div>
+                    </div>
+                    <!-- Timeline Item 8: Cyprus Conquered -->
+                    <div class="timeline-item-horizontal" data-year="1191" data-event="Cyprus Conquered">
+                        <div class="timeline-dot-horizontal bg-cyan-500"></div>
+                        <div class="timeline-card timeline-card-bottom card-hover">
+                            <div class="text-xl font-bold text-cyan-600 mb-2">May 1191</div>
+                            <div class="text-lg font-semibold mb-2">Cyprus Conquered</div>
+                            <p class="text-slate-600 text-sm">Richard conquers Cyprus en route</p>
+                        </div>
+                    </div>
+                    <!-- Timeline Item 9: Siege of Acre -->
+                    <div class="timeline-item-horizontal" data-year="1191" data-event="Siege of Acre Won">
+                        <div class="timeline-card timeline-card-top card-hover">
+                            <div class="text-xl font-bold text-emerald-600 mb-2">July 12, 1191</div>
+                            <div class="text-lg font-semibold mb-2">Siege of Acre Won</div>
+                            <p class="text-slate-600 text-sm">Major Crusader victory after 2-year siege</p>
+                        </div>
+                        <div class="timeline-dot-horizontal bg-emerald-500"></div>
+                    </div>
+                    <!-- Timeline Item 10: Philip Returns -->
+                    <div class="timeline-item-horizontal" data-year="1191" data-event="Philip II Returns">
+                        <div class="timeline-dot-horizontal bg-yellow-500"></div>
+                        <div class="timeline-card timeline-card-bottom card-hover">
+                            <div class="text-xl font-bold text-yellow-600 mb-2">July 31, 1191</div>
+                            <div class="text-lg font-semibold mb-2">Philip II Returns</div>
+                            <p class="text-slate-600 text-sm">French king departs for home</p>
+                        </div>
+                    </div>
+                    <!-- Timeline Item 11: Battle of Arsuf -->
+                    <div class="timeline-item-horizontal" data-year="1191" data-event="Battle of Arsuf">
+                        <div class="timeline-card timeline-card-top card-hover">
+                            <div class="text-xl font-bold text-green-600 mb-2">Sep 7, 1191</div>
+                            <div class="text-lg font-semibold mb-2">Battle of Arsuf</div>
+                            <p class="text-slate-600 text-sm">Richard defeats Saladin's forces</p>
+                        </div>
+                        <div class="timeline-dot-horizontal bg-green-500"></div>
+                    </div>
+                    <!-- Timeline Item 12: Advance on Jerusalem -->
+                    <div class="timeline-item-horizontal" data-year="1192" data-event="Advance on Jerusalem">
+                        <div class="timeline-dot-horizontal bg-pink-500"></div>
+                        <div class="timeline-card timeline-card-bottom card-hover">
+                            <div class="text-xl font-bold text-pink-600 mb-2">Jan 1192</div>
+                            <div class="text-lg font-semibold mb-2">Advance on Jerusalem</div>
+                            <p class="text-slate-600 text-sm">Richard's final push toward the Holy City</p>
+                        </div>
+                    </div>
+                    <!-- Timeline Item 13: Treaty of Jaffa -->
+                    <div class="timeline-item-horizontal" data-year="1192" data-event="Treaty of Jaffa">
+                        <div class="timeline-card timeline-card-top card-hover">
+                            <div class="text-xl font-bold text-purple-600 mb-2">Sep 2, 1192</div>
+                            <div class="text-lg font-semibold mb-2">Treaty of Jaffa</div>
+                            <p class="text-slate-600 text-sm">Peace agreement between Richard and Saladin</p>
+                        </div>
+                        <div class="timeline-dot-horizontal bg-purple-500"></div>
+                    </div>
+                    <!-- Timeline Item 14: Richard Returns -->
+                    <div class="timeline-item-horizontal" data-year="1192" data-event="Richard I Returns">
+                        <div class="timeline-dot-horizontal bg-slate-500"></div>
+                        <div class="timeline-card timeline-card-bottom card-hover">
+                            <div class="text-xl font-bold text-slate-600 mb-2">Oct 9, 1192</div>
+                            <div class="text-lg font-semibold mb-2">Richard I Returns</div>
+                            <p class="text-slate-600 text-sm">The Lionheart begins journey home</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Controls (Optional Enhancement) -->
+            <div class="bg-white rounded-2xl p-6 glow-shadow mt-12">
+                <div class="text-center">
+                    <h4 class="text-lg font-bold mb-4 text-slate-800">Timeline Navigation</h4>
+                    <p class="text-slate-600 mb-4">Use arrow keys ← → to navigate, or click any event for details</p>
+                    <div class="flex justify-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 bg-red-500 rounded-full"></div>
+                            <span class="text-sm text-slate-600">Defeats & Losses</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <span class="text-sm text-slate-600">Military Victories</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 bg-blue-500 rounded-full"></div>
+                            <span class="text-sm text-slate-600">Political Events</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 bg-purple-500 rounded-full"></div>
+                            <span class="text-sm text-slate-600">Diplomatic Treaties</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 bg-gray-500 rounded-full"></div>
+                            <span class="text-sm text-slate-600">Personal Events</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="mt-8 text-center">
+                <a href="#contents" class="text-blue-500 hover:underline">← Back to the Content</a>
+            </p>
+        </div>
+    </section>
+
+    <div class="section-divider my-16"></div>
+    <!-- Interactive Map Section -->
+    <section id="interactive-map" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-7xl md:text-9xl font-black text-center mb-20 text-slate-800">
+                CRUSADE MAP
+            </h2>
+
+            <!-- Map Introduction -->
+            <div class="bg-white rounded-3xl p-8 glow-shadow mb-12">
+                <h3 class="text-3xl font-bold mb-6 text-center text-slate-800">Journey of the Third Crusade</h3>
+                <p class="text-slate-600 text-center text-lg leading-relaxed max-w-4xl mx-auto">
+                    Let's take a look at some of the key events and locations in the Third Crusade.
+                </p>
+            </div>
+
+            <!-- 地图容器 -->
+            <div class="bg-white rounded-3xl p-6 glow-shadow mb-12">
+                    <div class="relative rounded-xl overflow-hidden" style="height: 600px;">
+                          <iframe 
+                                 src="https://uploads.knightlab.com/storymapjs/c7f10e58e65b48b617129a8522a04a1a/bbbb1111/index.html"
+                                 frameborder="0"
+                                 width="100%"
+                                 height="100%"
+                                 class="rounded-lg">
+                          </iframe>
+                     </div>
+            </div>
+            <p class="mt-8 text-center">
+                <a href="#contents" class="text-blue-500 hover:underline">← Back to the Content</a>
+             </p>
+        </div>
+    </section>
+    <div class="section-divider my-16"></div>
+
+    <!-- Main Characters -->
+    <section id="characters" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-7xl md:text-9xl font-black text-center mb-20 text-slate-800">
+                MAIN FIGURES
+            </h2>
+
+            <!-- Richard I -->
+            <div class="mb-20">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl p-8 h-96 flex items-center justify-center">
+                        <div class="text-center">
+                            <img
+                                   src="https://th.bing.com/th/id/OIP.pdZFVstCTyi9MVrmT3qjrAHaGI?w=223               &h=185&c=7&r=0&o=5&dpr=2&pid=1.7"
+                                   alt="Richard I"
+                                   class="w-60 h-60 rounded-full mx-auto mb-4 object-cover"
+                                   loading="lazy"
+                             />
+                            <div class="text-3xl font-bold text-slate-700">Richard I</div>
+                            <div class="text-xl text-slate-500">The Lionheart</div>
+                            <div class="text-lg text-slate-400">King of England</div>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <h3 class="text-4xl font-bold text-slate-800">Richard I of England</h3>
+                        <div class="space-y-4">
+                            <p class="text-slate-600">Born September 8, 1157 in Oxford, England, the third son of Henry II and Eleanor of Aquitaine.</p>
+                            <p class="text-slate-600">Involved in royal family civil war since age 16. After his elder brothers' deaths, he succeeded to the English throne.</p>
+                            <p class="text-slate-600">More interested in wealth and throne for military organization than governing the country.</p>
+                            <p class="text-slate-600">Defeated Saladin multiple times on the battlefield and forced him to sign a peace treaty with the Crusaders.</p>
+                            <p class="text-slate-600">A brave warrior who often fought lightly equipped and led troops personally, though his lack of concern for safety eventually led to his death.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Frederick I -->
+            <div class="mb-20">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                      <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-3xl p-8 h-96 flex items-center justify-center">
+                        <div class="text-center">
+                              <img
+                                   src="https://th.bing.com/th/id/OIP.QN6cJ4Hace1mnGjnT1K1aQAAAA?w=186&h=265&c=7&r=0&o=5&dpr=2&pid=1.7"
+                                   alt="Richard I"
+                                   class="w-60 h-60 rounded-full mx-auto mb-4 object-cover"
+                                   loading="lazy"
+                             />
+                            <div class="text-3xl font-bold text-slate-700">Frederick I</div>
+                            <div class="text-xl text-slate-500">Barbarossa</div>
+                            <div class="text-lg text-slate-400">Holy Roman Emperor</div>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <h3 class="text-4xl font-bold text-slate-800">Frederick I of Holy Roman Empire</h3>
+                        <div class="space-y-4">
+                            <p class="text-slate-600">Frederick Barbarossa, born December 1122. "Barbarossa" means "red beard" in Italian.</p>
+                            <p class="text-slate-600">Belonged to the House of Hohenstaufen, King of Romans and Emperor of the Holy Roman Empire.</p>
+                            <p class="text-slate-600">Also Duke of Swabia in Germany and King of Italy.</p>
+                            <p class="text-slate-600">Participated in both the Second and Third Crusades. Had a friendly treaty with Saladin during the Second Crusade in 1175.</p>
+                            <p class="text-slate-600">On April 15, 1189, officially received the staff and insignia, organizing the most "thoroughly planned and organized" crusade with 100,000-strong army including 20,000 knights.</p>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+
+            <!-- Philip II -->
+            <div class="mb-20">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-3xl p-8 h-96 flex items-center justify-center">
+                        <div class="text-center">
+                          <img
+                                   src="https://th.bing.com/th/id/OIP.KXxn-2GR5AhuyKwL8_VSMQHaJ4?w=186&h=248&c=7&r=0&o=5&dpr=2&pid=1.7"
+                                   alt="Richard I"
+                                   class="w-60 h-60 rounded-full mx-auto mb-4 object-cover"
+                                   loading="lazy"
+                             />
+                            <div class="text-3xl font-bold text-slate-700">Philip II</div>
+                            <div class="text-xl text-slate-500">Augustus</div>
+                            <div class="text-lg text-slate-400">King of France</div>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <h3 class="text-4xl font-bold text-slate-800">Philip II of France</h3>
+                        <div class="space-y-4">
+                            <p class="text-slate-600">Also known as Philip Augustus, King of France from 1180 to 1223.</p>
+                            <p class="text-slate-600">First French monarch to style himself "King of France" (rex Francie) from 1190 onward.</p>
+                            <p class="text-slate-600">Son of King Louis VII and Adela of Champagne, originally nicknamed "God-given" (Dieudonné).</p>
+                            <p class="text-slate-600">Given the epithet "Augustus" by chronicler Rigord for extending crown lands of France remarkably.</p>
+                            <p class="text-slate-600">Unlike Richard, Philip was politically experienced. When he joined the Crusade, he had already been king for ten years and formed an alliance with Richard.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saladin -->
+            <div class="mb-20">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                 <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-3xl p-8 h-96 flex items-center justify-center">
+                        <div class="text-center">
+                         <img
+                                   src="https://th.bing.com/th/id/OIP.GuVyvgraaVJDtB48Pysr9QHaGL?w=215&h=180&c=7&r=0&o=5&dpr=2&pid=1.7"
+                                   alt="Richard I"
+                                   class="w-60 h-60 rounded-full mx-auto mb-4 object-cover"
+                                   loading="lazy"
+                             />
+                            <div class="text-3xl font-bold text-slate-700">Saladin</div>
+                            <div class="text-xl text-slate-500">Salah al-Din</div>
+                            <div class="text-lg text-slate-400">Ayyubid Sultan</div>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <h3 class="text-4xl font-bold text-slate-800">Saladin of Ayyubid Dynasty</h3>
+                        <div class="space-y-4">
+                            <p class="text-slate-600">Real name: Salah al-Din Yusuf ibn Ayyub, first Sultan of the Ayyubid Dynasty (1174-1193).</p>
+                            <p class="text-slate-600">At his peak, his Sultanate encompassed Egypt, Syria, Mesopotamia, Kurdistan, Hijaz and Yemen.</p>
+                            <p class="text-slate-600">Regarded as a national hero of Egyptian history, though born in Mosul as a Kurd, not Egyptian.</p>
+                            <p class="text-slate-600">Demonstrated outstanding leadership skills, chivalrous demeanor and military prowess during the fight against Crusaders.</p>
+                            <p class="text-slate-600">Became famous in both Christian and Muslim worlds for being generous and never stinting on money.</p>
+                        </div>
+                    </div>                 
+                </div>
+            </div>
+                            </div>                                        
+                    </div>
+                </div>
+            </div>
+        <p class="mt-8 text-center">
+          <a href="#contents" class="text-blue-500 hover:underline">← Back to the Content</a>
+        </p>
+        </div>
+    </section>
+
+    <div class="section-divider my-16"></div>
+
+<!-- Character Network Section -->
+<section id="character-network" class="py-20">
+    <div class="container mx-auto px-4">
+        <h2 class="text-7xl md:text-9xl font-black text-center mb-20 text-slate-800">
+            CHARACTER NETWORK
+        </h2>
+
+        <!-- Network Visualization Container -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <!-- Network Graph -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-3xl p-8 glow-shadow relative" style="height: 500px;">
+                    <h3 class="text-2xl font-bold mb-6 text-slate-800">Alliance & Opposition Network</h3>
+                    <svg id="network-svg" width="100%" height="400" class="border border-slate-100 rounded-xl">
+                        <!-- Network will be drawn here by JavaScript -->
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Character Info Panel -->
+            <div class="space-y-6">
+                <div id="character-info" class="bg-white rounded-3xl p-6 glow-shadow card-hover">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-users text-slate-400 text-2xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-slate-600">Select a Character</h4>
+                        <p class="text-slate-500 mt-2">Click on any node to view detailed information</p>
+                    </div>
+                </div>
+
+                <!-- Relationship Legend -->
+                <div class="bg-white rounded-3xl p-6 glow-shadow">
+                    <h4 class="text-lg font-bold mb-4 text-slate-800">Relationship Types</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <div class="w-8 h-1 bg-emerald-500 mr-3"></div>
+                            <span class="text-sm text-slate-600">Alliance</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-1 bg-red-500 mr-3"></div>
+                            <span class="text-sm text-slate-600">Opposition</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-1 bg-yellow-500 mr-3 border-dashed border-2 border-yellow-500 bg-transparent"></div>
+                            <span class="text-sm text-slate-600">Temporary Alliance</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-1 bg-purple-500 mr-3"></div>
+                            <span class="text-sm text-slate-600">Diplomatic Relations</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Relationships -->
+        <div class="bg-white rounded-3xl p-8 glow-shadow">
+            <h3 class="text-3xl font-bold mb-8 text-center text-slate-800">Key Relationships & Dynamics</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <div class="border-l-4 border-emerald-500 pl-4">
+                        <h4 class="text-lg font-bold text-slate-800">Richard I & Philip II</h4>
+                        <p class="text-slate-600">Initially allied for the Crusade, but their relationship deteriorated due to competing interests and Philip's early departure.</p>
+                    </div>
+                    <div class="border-l-4 border-red-500 pl-4">
+                        <h4 class="text-lg font-bold text-slate-800">Richard I & Saladin</h4>
+                        <p class="text-slate-600">Respectful enemies who developed mutual admiration despite being on opposite sides of the conflict.</p>
+                    </div>
+                    <div class="border-l-4 border-yellow-500 pl-4">
+                        <h4 class="text-lg font-bold text-slate-800">Frederick I & Saladin</h4>
+                        <p class="text-slate-600">Had friendly relations during the Second Crusade, but Frederick's death prevented direct confrontation in the Third.</p>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <h4 class="text-lg font-bold text-slate-800">Three Kings Alliance</h4>
+                        <p class="text-slate-600">Frederick I, Richard I, and Philip II formed an alliance that was more political convenience than genuine cooperation.</p>
+                    </div>
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h4 class="text-lg font-bold text-slate-800">Saladin's Unity</h4>
+                        <p class="text-slate-600">Successfully united various Muslim factions under his leadership, creating a formidable opposition to the Crusaders.</p>
+                    </div>
+                    <div class="border-l-4 border-amber-500 pl-4">
+                        <h4 class="text-lg font-bold text-slate-800">Internal Conflicts</h4>
+                        <p class="text-slate-600">Crusader leadership often struggled with internal divisions and competing national interests.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+     <p class="mt-8 text-center">
+          <a href="#contents" class="text-blue-500 hover:underline">← Back to the Content</a>
+     </p>
+    </div>
+</section>
+
+    
+    <div class="section-divider my-16"></div>
+          
+    <!-- Influence and Legacy -->
+    <section id="influence" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-7xl md:text-9xl font-black text-center mb-20 text-slate-800">
+                INFLUENCE
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
+                <!-- Military & Political -->
+                <div class="bg-white rounded-3xl p-8 glow-shadow card-hover">
+                    <div class="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chess-knight text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-6 text-slate-800">Military & Political Outcomes</h3>
+                    <div class="space-y-4 text-slate-600">
+                        <p><strong>Failed Objective:</strong> Crusaders did not recapture Jerusalem</p>
+                        <p><strong>Coastal Strongholds:</strong> Christians retained key ports like Acre, Jaffa, and Tyre</p>
+                        <p><strong>Saladin's Legacy:</strong> His death in 1193 weakened Muslim unity, but Ayyubids continued ruling</p>
+                    </div>
+                </div>
+
+                <!-- European Consequences -->
+                <div class="bg-white rounded-3xl p-8 glow-shadow card-hover">
+                    <div class="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-coins text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-6 text-slate-800">European Consequences</h3>
+                    <div class="space-y-4 text-slate-600">
+                        <p><strong>Financial Drain:</strong> Kings like Richard I heavily taxed their realms</p>
+                        <p><strong>Economic Strain:</strong> Massive costs of long-distance warfare</p>
+                        <p><strong>Shift in Focus:</strong> Future Crusades targeted Egypt or Constantinople</p>
+                    </div>
+                </div>
+
+                <!-- Cultural Effects -->
+                <div class="bg-white rounded-3xl p-8 glow-shadow card-hover">
+                    <div class="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-book text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-6 text-slate-800">Cultural & Religious Effects</h3>
+                    <div class="space-y-4 text-slate-600">
+                        <p><strong>Diplomatic Exchange:</strong> Temporary truces allowed trade and pilgrimage</p>
+                        <p><strong>Mythologized Heroes:</strong> Richard "Lionheart" and Saladin became legendary</p>
+                        <p><strong>Limited Interaction:</strong> Fostered some Christian-Muslim cultural exchange</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Long-term Impact -->
+            <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-3xl p-12 glow-shadow">
+                <h3 class="text-4xl font-bold mb-8 text-center text-slate-800">Long-Term Decline of Crusader States</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-6">
+                        <p class="text-xl text-slate-600">Without Jerusalem, Crusader territories gradually shrank until the fall of Acre in 1291 ended their presence in the Holy Land.</p>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold">1192</span>
+                                </div>
+                                <span class="text-slate-600">Treaty of Jaffa - Compromise solution</span>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold">1291</span>
+                                </div>
+                                <span class="text-slate-600">Fall of Acre - End of Crusader presence</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-8 text-center">
+                        <div class="text-6xl font-black text-slate-300 mb-4">99</div>
+                        <div class="text-xl font-bold text-slate-700">Years</div>
+                        <div class="text-slate-500">From compromise to complete loss</div>
+                    </div>
+                </div>
+            </div>
+        <p class="mt-8 text-center">
+          <a href="#contents" class="text-blue-500 hover:underline">← Back to the Content</a>
+        </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-20 bg-slate-900 text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-6xl font-black mb-8">Thank You!</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto">
+                <div>
+                    <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold">Zhengbo Shen</h3>
+                    <p class="text-slate-400">1306218</p>
+                </div>
+                <div>
+                    <div class="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold">Jianhao Wang</h3>
+                    <p class="text-slate-400">1306015</p>
+                </div>
+                <div>
+                    <div class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold">Kaile Qu</h3>
+                    <p class="text-slate-400">1306182</p>
+                </div>
+            </div>
+            <div class="mt-12 text-slate-400">
+                <p>The Third Crusade: A Historical Analysis</p>
+                <p class="text-sm">1189 - 1192 CE</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Apply animation to all sections
+        document.addEventListener('DOMContentLoaded', () => {
+            const animatedElements = document.querySelectorAll('section, .card-hover');
+            
+            animatedElements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                observer.observe(el);
+            });
+
+            // Hero section immediate animation
+            const heroSection = document.getElementById('hero');
+            heroSection.style.opacity = '1';
+            heroSection.style.transform = 'translateY(0)';
+
+            // Parallax effect for hero
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const parallax = scrolled * 0.5;
+                
+                if (heroSection) {
+                    heroSection.style.transform = `translateY(${parallax}px)`;
+                }
+            });
+
+            // Smooth scroll for navigation
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Add stagger animation to grid items
+            const gridItems = document.querySelectorAll('.grid > *');
+            gridItems.forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.1}s`;
+            });
+           // 在这里添加新的Timeline Navigator代码 ↓
+            const navigator = new TimelineNavigator();
+            window.addEventListener('resize', () => {
+                 setTimeout(() => {
+                      navigator.updateTimelineWidth();
+                 }, 100);
+             });
+    
+             setTimeout(() => {
+                  navigator.updateTimelineWidth();
+                 }, 100);
+           });
+
+
+        // Add hover effects
+        document.querySelectorAll('.card-hover').forEach(card => {
+            if (!card.classList.contains('timeline-card')) {
+                card.addEventListener('mouseenter', function() {
+                         this.style.transform = 'translateY(-8px) scale(1.02)';
+                         this.style.boxShadow = '0 25px 50px rgba(0, 0, 0, 0.15)';
+                 });
+        
+                 card.addEventListener('mouseleave', function() {
+                         this.style.transform = 'translateY(0) scale(1)';
+                         this.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.3)';
+                  });
+               }
+           });                   
+                    
+       
+
+        // Timeline animation
+        const timelineItems = document.querySelectorAll('.timeline-line + div');
+        timelineItems.forEach((item, index) => {
+            setTimeout(() => {
+                observer.observe(item);
+            }, index * 200);
+        });
+    </script>
+<script>
+    // 1. 首先在你的JavaScript部分添加timeline详细数据
+const timelineDetailData = {
+    "hattin": {
+        title: "Battle of Hattin - July 4, 1187",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The Decisive Battle</h4>
+            <p>The Battle of Hattin was the turning point that led to the fall of Jerusalem. Saladin's strategic genius trapped the Crusader army in the arid hills of Galilee.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Battle Details</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Forces:</strong> Saladin's 30,000 vs Crusaders' 20,000</li>
+                <li><strong>Strategy:</strong> Saladin besieged Tiberias to lure Crusaders into desert</li>
+                <li><strong>Key Factor:</strong> Extreme heat and lack of water weakened Crusader forces</li>
+                <li><strong>Outcome:</strong> Decisive Muslim victory, King Guy captured</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Historical Impact</h4>
+            <p>This victory opened the path to Jerusalem and marked the beginning of the Third Crusade. The capture of the True Cross was particularly devastating to Christian morale.</p>
+        `,
+        videoUrl: "https://www.youtube.com/embed/ndXuRoJd6hQ?si=gxsaCzIRHCB79Vn3" // 替换为实际的视频URL
+    },
+    "jerusalem-fall": {
+        title: "Fall of Jerusalem - October 2, 1187",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The Recapture</h4>
+            <p>After nearly 90 years of Crusader rule, Jerusalem fell back into Muslim hands under Saladin's leadership.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The Siege</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Duration:</strong> Brief siege from September 20 to October 2</li>
+                <li><strong>Defense:</strong> Weak garrison led by Balian of Ibelin</li>
+                <li><strong>Terms:</strong> Negotiated surrender with ransom for inhabitants</li>
+                <li><strong>Aftermath:</strong> Christian pilgrims allowed to visit</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Saladin's Mercy</h4>
+            <p>Unlike the bloodbath when Crusaders took Jerusalem in 1099, Saladin showed remarkable mercy, allowing safe passage for many Christians and protecting holy sites.</p>
+        `,
+        videoUrl: "https://www.youtube.com/embed/54GxYRcstOM?si=cfGf_CjTIMQlZa6S"
+    },
+    "papal-call": {
+        title: "Papal Call to Arms - October 29, 1187",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">Gregory VIII's Response</h4>
+            <p>Pope Gregory VIII issued the bull "Audita Tremendi" calling for immediate mobilization across Christian Europe.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The Call</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Spiritual Incentives:</strong> Full remission of sins for participants</li>
+                <li><strong>Financial Support:</strong> Introduction of the "Saladin Tithe"</li>
+                <li><strong>Political Unity:</strong> Suspension of European conflicts</li>
+                <li><strong>Moral Imperative:</strong> Framed as divine punishment for Christian sins</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">European Response</h4>
+            <p>The call resonated across Europe, with three major monarchs taking the cross: Frederick Barbarossa, Richard I, and Philip II.</p>
+        `,
+        videoUrl: "https://www.youtube.com/embed/QfBmNL0hYPg?si=wnjmjW878GwCSrSe"
+    },
+    "frederick-departs": {
+        title: "Frederick I Departs - May 11, 1189",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The German Expedition</h4>
+            <p>Frederick Barbarossa led the largest and most organized Crusade army, with nearly 100,000 men including 20,000 knights.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The March</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Route:</strong> Overland through Hungary and Byzantine Empire</li>
+                <li><strong>Preparation:</strong> Diplomatic treaties secured passage rights</li>
+                <li><strong>Organization:</strong> Most methodically planned Crusade expedition</li>
+                <li><strong>Goal:</strong> Restore Holy Roman Empire's prestige</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Early Success</h4>
+            <p>The German army achieved several victories in Anatolia against Seljuk forces, demonstrating the potential of Frederick's well-organized expedition.</p>
+        `,
+        
+    },
+    "richard-crowned": {
+        title: "Richard I Crowned - September 3, 1189",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The Lionheart's Ascension</h4>
+            <p>Richard I became King of England after his father Henry II's death, immediately focusing on funding and organizing his Crusade.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Crusade Preparations</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Fundraising:</strong> "I would sell London if I could find a buyer"</li>
+                <li><strong>Taxation:</strong> Heavy levies on English subjects</li>
+                <li><strong>Alliances:</strong> Partnership with Philip II of France</li>
+                <li><strong>Fleet:</strong> Assembled one of the largest medieval fleets</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Personal Motivation</h4>
+            <p>Richard saw the Crusade as his path to glory and redemption, famously declaring his commitment to reclaim the Holy Land.</p>
+        `,
+        
+    },
+    "frederick-dies": {
+        title: "Frederick I Dies - June 10, 1190",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">Tragedy in the Saleph River</h4>
+            <p>The drowning of Frederick Barbarossa was one of the most devastating blows to the Third Crusade, causing the massive German army to largely disband.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The Incident</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Location:</strong> Saleph River (modern Göksu River) in Turkey</li>
+                <li><strong>Circumstances:</strong> Unclear - possibly heart attack while bathing</li>
+                <li><strong>Age:</strong> 67 years old, remarkable for medieval times</li>
+                <li><strong>Impact:</strong> Immediate collapse of German expedition</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Aftermath</h4>
+            <p>Most German troops returned home, leaving only a small contingent under Frederick's son. This changed the entire dynamic of the Crusade.</p>
+        `,
+        
+    },
+    "kings-depart": {
+        title: "Kings Depart for East - July 4, 1190",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The Anglo-French Expedition</h4>
+            <p>Richard I and Philip II launched their joint expedition from Vézelay, marking the beginning of the maritime phase of the Third Crusade.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The Fleet</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Size:</strong> Over 100 ships carrying thousands of soldiers</li>
+                <li><strong>Route:</strong> Mediterranean sea route via Sicily</li>
+                <li><strong>Logistics:</strong> Massive supply chain for extended campaign</li>
+                <li><strong>Alliance:</strong> Temporary cooperation between traditional rivals</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Strategic Advantage</h4>
+            <p>The sea route allowed faster deployment and better supply lines compared to the overland route, though it required substantial naval resources.</p>
+        `,
+        
+    },
+    "cyprus-conquered": {
+        title: "Cyprus Conquered - May 1191",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">Strategic Acquisition</h4>
+            <p>Richard's conquest of Cyprus provided a crucial base for Crusader operations and demonstrated his military prowess before reaching the Holy Land.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The Campaign</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Trigger:</strong> Shipwreck led to conflict with local ruler Isaac Komnenos</li>
+                <li><strong>Duration:</strong> Swift campaign lasting only a few weeks</li>
+                <li><strong>Strategy:</strong> Combined naval and land operations</li>
+                <li><strong>Outcome:</strong> Complete control of the island</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Long-term Impact</h4>
+            <p>Cyprus became a Crusader kingdom that survived until 1571, long after the mainland Crusader states had fallen.</p>
+        `,
+        videoUrl: "https://www.youtube.com/embed/PV2dMs737MY?si=R1jnCog5fm64-oa9"
+    },
+    "acre-siege": {
+        title: "Siege of Acre Won - July 12, 1191",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The Great Victory</h4>
+            <p>The capture of Acre after a grueling two-year siege was the first major Crusader victory and established the base for further operations.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The Siege</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Duration:</strong> 1189-1191, one of the longest medieval sieges</li>
+                <li><strong>Forces:</strong> Combined armies of multiple Crusader leaders</li>
+                <li><strong>Innovation:</strong> Use of advanced siege engines and tactics</li>
+                <li><strong>Turning Point:</strong> Arrival of Richard and Philip's armies</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Significance</h4>
+            <p>Acre's fall provided the Crusaders with a secure port, supply base, and demonstrated that Saladin's forces could be defeated.</p>
+        `,
+        videoUrl: "https://www.youtube.com/embed/SzR5XGzZ9gY?si=VnvNdu7f31_rc2Be"
+    },
+    "philip-returns": {
+        title: "Philip II Returns - July 31, 1191",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The Early Departure</h4>
+            <p>Philip II's decision to return to France after Acre's capture significantly weakened the Crusade and strained the alliance with Richard.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Reasons for Departure</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Illness:</strong> Claimed poor health and fever</li>
+                <li><strong>Political Tensions:</strong> Growing conflicts with Richard</li>
+                <li><strong>Domestic Concerns:</strong> Opportunities in France during Richard's absence</li>
+                <li><strong>Limited Interest:</strong> Less religious motivation than other leaders</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Consequences</h4>
+            <p>Philip's departure left Richard as the primary Crusader leader but also removed crucial French military support for the campaign.</p>
+        `,
+        
+    },
+    "arsuf-battle": {
+        title: "Battle of Arsuf - September 7, 1191",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">Richard's Tactical Masterpiece</h4>
+            <p>The Battle of Arsuf demonstrated Richard's military genius and was one of the few clear-cut Crusader victories over Saladin's forces.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The Battle</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Formation:</strong> Richard's disciplined defensive formation</li>
+                <li><strong>Tactics:</strong> Controlled cavalry charge at the decisive moment</li>
+                <li><strong>Innovation:</strong> Integration of crossbowmen and heavy cavalry</li>
+                <li><strong>Leadership:</strong> Richard's personal leadership inspired his troops</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Impact</h4>
+            <p>This victory enhanced Richard's reputation and opened the road to Jaffa, though it didn't lead to Jerusalem's recapture.</p>
+        `,
+        videoUrl: "https://www.youtube.com/embed/m_hfl1ueNro?si=ob0aWykZVkOSjMwJ"
+    },
+    "jerusalem-advance": {
+        title: "Advance on Jerusalem - January 1192",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The Final Push</h4>
+            <p>Richard's advance toward Jerusalem represented the climax of the Third Crusade, though ultimately he decided not to assault the holy city.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Strategic Considerations</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Distance:</strong> Reached within 12 miles of Jerusalem</li>
+                <li><strong>Logistics:</strong> Extended supply lines from coastal bases</li>
+                <li><strong>Intelligence:</strong> Reports of strong defensive preparations</li>
+                <li><strong>Weather:</strong> Harsh winter conditions in the Judean hills</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The Decision</h4>
+            <p>Richard ultimately decided against besieging Jerusalem, recognizing that even if captured, it would be difficult to hold without broader territorial control.</p>
+        `,
+        videoUrl: "https://www.youtube.com/embed/1UmxUQLp4VY?si=ZqwI9qq3lyX1DF-P"
+    },
+    "jaffa-treaty": {
+        title: "Treaty of Jaffa - September 2, 1192",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The Diplomatic Solution</h4>
+            <p>The Treaty of Jaffa represented a pragmatic compromise that ended the Third Crusade while preserving some Crusader presence in the Holy Land.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Terms of the Treaty</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Jerusalem:</strong> Remained under Muslim control</li>
+                <li><strong>Pilgrimage:</strong> Christian pilgrims guaranteed safe passage</li>
+                <li><strong>Territory:</strong> Crusaders kept coastal strip from Tyre to Jaffa</li>
+                <li><strong>Duration:</strong> Three-year, three-month truce</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Mutual Respect</h4>
+            <p>The treaty reflected the mutual respect between Richard and Saladin, two of history's most renowned military leaders.</p>
+        `,
+        
+    },
+    "richard-returns": {
+        title: "Richard I Returns - October 9, 1192",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The Journey Home</h4>
+            <p>Richard's departure marked the end of the Third Crusade, though his journey home would prove as perilous as the Crusade itself.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The Departure</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Reason:</strong> News of troubles in England and France</li>
+                <li><strong>Route:</strong> Planned to sail through Mediterranean</li>
+                <li><strong>Disguise:</strong> Attempted to travel incognito</li>
+                <li><strong>Capture:</strong> Later captured and held for ransom in Austria</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Legacy</h4>
+            <p>Despite not recapturing Jerusalem, Richard's military prowess during the Crusade earned him the eternal epithet "Lionheart."</p>
+        `,
+       
+    }
+};
+
+// 2. 修改现有的timeline item点击事件
+function addTimelineClickEvents() {
+    // 为每个timeline卡片添加点击事件
+    const timelineCards = document.querySelectorAll('.timeline-card');
+    timelineCards.forEach((card, index) => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showTimelineDetail(index);
+        });
+        
+        // 添加hover效果
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'scale(1.05)';
+            card.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.2)';
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'scale(1)';
+            card.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+        });
+    });
+}
+
+// 3. 显示timeline详细内容的函数
+function showTimelineDetail(index) {
+    // 事件键值映射
+    const eventKeys = [
+        'hattin', 'jerusalem-fall', 'papal-call', 'frederick-departs', 
+        'richard-crowned', 'frederick-dies', 'kings-depart', 'cyprus-conquered',
+        'acre-siege', 'philip-returns', 'arsuf-battle', 'jerusalem-advance',
+        'jaffa-treaty', 'richard-returns'
+    ];
+    
+    const eventKey = eventKeys[index];
+    const data = timelineDetailData[eventKey];
+    
+    if (!data) return;
+    
+    const modal = document.getElementById('detailModal');
+    const title = document.getElementById('modalTitle');
+    const content = document.getElementById('modalContent');
+    
+    // 创建包含视频的内容
+    const videoSection = data.videoUrl ? `
+        <div class="mb-6">
+            <h4 class="text-lg font-bold text-slate-800 mb-3">Related Video</h4>
+            <div class="relative" style="padding-bottom: 56.25%; height: 0;">
+                <iframe 
+                    src="${data.videoUrl}" 
+                    class="absolute top-0 left-0 w-full h-full rounded-lg"
+                    frameborder="0" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    ` : '';
+    
+    title.textContent = data.title;
+    content.innerHTML = videoSection + data.content;
+    
+    modal.classList.remove('hidden');
+}
+
+// 4. 在页面加载完成后添加事件监听
+document.addEventListener('DOMContentLoaded', () => {
+    // 延迟执行以确保timeline已经渲染完成
+    setTimeout(() => {
+        addTimelineClickEvents();
+    }, 500);
+});
+
+// 5. 可选：添加键盘快捷键支持
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeDetailModal();
+    }
+});
+
+// 6. 改进的模态框关闭函数
+function closeDetailModal() {
+    const modal = document.getElementById('detailModal');
+    modal.classList.add('hidden');
+    
+    // 暂停所有视频
+    const iframes = modal.querySelectorAll('iframe');
+    iframes.forEach(iframe => {
+        const src = iframe.src;
+        iframe.src = '';
+        iframe.src = src;
+    });
+}
+
+const kingDetailData = {
+    frederick: {
+        title: "Frederick I Barbarossa - Imperial Ambitions",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The Holy Roman Emperor's Vision</h4>
+            <p>Frederick I, known as "Barbarossa" (Red Beard), saw the Third Crusade as an opportunity to restore the prestige of the Holy Roman Empire and assert his role as the leader of Christendom.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Military Organization</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Largest Force:</strong> Nearly 100,000 men, including 20,000 professional soldiers</li>
+                <li><strong>German Efficiency:</strong> Most organized and well-planned crusade expedition</li>
+                <li><strong>Land Route:</strong> Chose the overland route through Byzantine Empire</li>
+                <li><strong>Diplomatic Preparation:</strong> Secured treaties with Hungarian and Byzantine rulers</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Political Motivations</h4>
+            <p>Frederick's participation was driven by multiple factors: religious duty, imperial prestige, competition with French and English kings, and the desire to strengthen his position in European politics.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Tragic End</h4>
+            <p>Frederick's death by drowning in the Saleph River (1190) was a devastating blow to the Crusade, causing most of his army to abandon the expedition and return to Germany.</p>
+        `
+    },
+    richard: {
+        title: "Richard I Lionheart - The Warrior King's Quest",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">Personal Glory and Royal Duty</h4>
+            <p>Richard I's participation in the Third Crusade was motivated by a combination of religious fervor, personal ambition, and the desire to surpass his father Henry II's legacy.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Financial Sacrifices</h4>
+            <p>Richard famously declared he would "sell London itself" to fund the Crusade. He:</p>
+            <ul class="list-disc ml-6 mt-2">
+                <li>Imposed heavy taxes on his subjects</li>
+                <li>Sold official positions and privileges</li>
+                <li>Mortgaged crown lands</li>
+                <li>Released Scottish King William for 10,000 marks</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Military Prowess</h4>
+            <p>Richard earned his "Lionheart" epithet through his exceptional military leadership during the Crusade, including victories at Acre, Arsuf, and Jaffa.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Strategic Interests</h4>
+            <p>Beyond religious motivation, Richard sought to establish England as a major European power and secure strategic positions in the Mediterranean trade routes.</p>
+        `
+    },
+    philip: {
+        title: "Philip II Augustus - The Calculating Monarch",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">Political Pragmatism</h4>
+            <p>Philip II's approach to the Crusade was markedly different from his contemporaries - he viewed it primarily through the lens of French political interests and European balance of power.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Strategic Calculations</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Rivalry with Richard:</strong> Saw the Crusade as a way to monitor and potentially undermine English power</li>
+                <li><strong>Territorial Ambitions:</strong> Interested in expanding French influence in the Mediterranean</li>
+                <li><strong>Domestic Priorities:</strong> Concerned about consolidating royal power within France</li>
+                <li><strong>Economic Considerations:</strong> Wanted to control the costs and duration of the expedition</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Early Departure</h4>
+            <p>Philip's decision to return to France after the capture of Acre (1191) was driven by:</p>
+            <ul class="list-disc ml-6 mt-2">
+                <li>Illness and dissatisfaction with the campaign's progress</li>
+                <li>Opportunities to expand French territory while Richard was absent</li>
+                <li>Growing tensions with Richard over leadership and strategy</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Long-term Impact</h4>
+            <p>Philip's pragmatic approach ultimately served France well, as he used Richard's absence to consolidate royal power and expand French territories.</p>
+        `
+    }
+};
+
+// 新增显示三王详细信息的函数
+function showKingDetail(king) {
+    const modal = document.getElementById('detailModal');
+    const title = document.getElementById('modalTitle');
+    const content = document.getElementById('modalContent');
+    
+    const data = kingDetailData[king];
+    title.textContent = data.title;
+    content.innerHTML = data.content;
+    
+    modal.classList.remove('hidden');
+}
+
+// Character Network Visualization
+(function() {
+    const networkData = {
+        nodes: [
+            { id: 'richard', name: 'Richard I', country: 'England', color: '#2563eb', x: 115, y: 240, 
+              info: 'King of England, "The Lionheart". Led English forces in the Third Crusade with remarkable military prowess.' },
+            { id: 'philip', name: 'Philip II', country: 'France', color: '#eab308', x: 40, y: 120, 
+              info: 'King of France, "Augustus". Politically experienced ruler who departed early from the Crusade.' },
+            { id: 'frederick', name: 'Frederick I', country: 'Holy Roman Empire', color: '#dc2626', x: 260, y: 80, 
+              info: 'Holy Roman Emperor, "Barbarossa". Led the largest and most organized Crusade army.' },
+            { id: 'saladin', name: 'Saladin', country: 'Ayyubid Dynasty', color: '#059669', x: 430, y: 180, 
+              info: 'Sultan of the Ayyubid Dynasty. United Muslim forces and recaptured Jerusalem in 1187.' },
+            { id: 'guy', name: 'Guy of Lusignan', country: 'Jerusalem', color: '#8b5cf6', x: 350, y: 280, 
+              info: 'King of Jerusalem. Captured at the Battle of Hattin, later released by Saladin.' },
+            { id: 'conrad', name: 'Conrad of Montferrat', country: 'Tyre', color: '#f59e0b', x: 200, y: 320, 
+              info: 'Defender of Tyre and rival claimant to the throne of Jerusalem.' }
+        ],
+        links: [
+            { source: 'richard', target: 'philip', strength: 'weak', 
+              description: 'Temporary alliance that deteriorated due to competing interests' },
+            { source: 'richard', target: 'frederick', type: 'alliance', strength: 'strong', 
+              description: 'Part of the Three Kings Alliance for the Crusade' },
+            { source: 'philip', target: 'frederick', type: 'alliance', strength: 'medium', 
+              description: 'Allied for the Crusade but with different strategic goals' },
+            { source: 'richard', target: 'saladin', type: 'opposition', strength: 'strong', 
+              description: 'Respectful enemies with mutual admiration' },
+            { source: 'philip', target: 'saladin', type: 'opposition', strength: 'weak', 
+              description: 'Philip left before major confrontations with Saladin' },
+            { source: 'frederick', target: 'saladin', type: 'diplomatic', strength: 'medium', 
+              description: 'Previously had friendly relations during Second Crusade' },
+            { source: 'richard', target: 'guy', type: 'alliance', strength: 'medium', 
+              description: 'Richard supported Guy\'s claim to Jerusalem throne' },
+            { source: 'richard', target: 'conrad', type: 'opposition', strength: 'medium', 
+              description: 'Political rivalry over Jerusalem succession' },
+            { source: 'saladin', target: 'guy', type: 'opposition', strength: 'strong', 
+              description: 'Saladin captured Guy at Hattin but later released him' }
+        ]
+    };
+
+    function initializeNetwork() {
+        const svg = document.getElementById('network-svg');
+        if (!svg) return;
+
+        const width = svg.clientWidth;
+        const height = 400;
+        
+        // Clear existing content
+        svg.innerHTML = '';
+        
+        // Create definitions for arrowheads
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        svg.appendChild(defs);
+        
+        // Draw links
+        networkData.links.forEach(link => {
+            const sourceNode = networkData.nodes.find(n => n.id === link.source);
+            const targetNode = networkData.nodes.find(n => n.id === link.target);
+            
+            if (sourceNode && targetNode) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', sourceNode.x);
+                line.setAttribute('y1', sourceNode.y);
+                line.setAttribute('x2', targetNode.x);
+                line.setAttribute('y2', targetNode.y);
+                
+                // Set line style based on relationship type
+                switch(link.type) {
+                    case 'alliance':
+                        line.setAttribute('stroke', '#059669');
+                        line.setAttribute('stroke-width', link.strength === 'strong' ? '4' : '2');
+                        break;
+                    case 'opposition':
+                        line.setAttribute('stroke', '#dc2626');
+                        line.setAttribute('stroke-width', link.strength === 'strong' ? '4' : '2');
+                        break;
+                    case 'diplomatic':
+                        line.setAttribute('stroke', '#8b5cf6');
+                        line.setAttribute('stroke-width', '3');
+                        break;
+                    default:
+                        line.setAttribute('stroke', '#eab308');
+                        line.setAttribute('stroke-width', '2');
+                }
+                
+                line.setAttribute('opacity', '0.7');
+                line.classList.add('network-link');
+                line.setAttribute('data-description', link.description);
+                svg.appendChild(line);
+            }
+        });
+        
+        // Draw nodes
+        networkData.nodes.forEach(node => {
+            // Node circle
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', node.x);
+            circle.setAttribute('cy', node.y);
+            circle.setAttribute('r', '25');
+            circle.setAttribute('fill', node.color);
+            circle.setAttribute('stroke', 'white');
+            circle.setAttribute('stroke-width', '3');
+            circle.classList.add('network-node');
+            circle.style.cursor = 'pointer';
+            circle.style.transition = 'all 0.3s ease';
+            
+            // Add hover and click events
+            circle.addEventListener('mouseenter', () => {
+                circle.setAttribute('r', '30');
+                circle.style.filter = 'drop-shadow(0 0 10px rgba(0,0,0,0.3))';
+            });
+            
+            circle.addEventListener('mouseleave', () => {
+                circle.setAttribute('r', '25');
+                circle.style.filter = 'none';
+            });
+            
+            circle.addEventListener('click', () => showCharacterInfo(node));
+            
+            svg.appendChild(circle);
+            
+            // Node label
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', node.x);
+            text.setAttribute('y', node.y + 45);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('font-size', '12');
+            text.setAttribute('font-weight', 'bold');
+            text.setAttribute('fill', '#374151');
+            text.textContent = node.name;
+            text.style.pointerEvents = 'none';
+            svg.appendChild(text);
+            
+            // Country label
+            const countryText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            countryText.setAttribute('x', node.x);
+            countryText.setAttribute('y', node.y + 60);
+            countryText.setAttribute('text-anchor', 'middle');
+            countryText.setAttribute('font-size', '10');
+            countryText.setAttribute('fill', '#6b7280');
+            countryText.textContent = node.country;
+            countryText.style.pointerEvents = 'none';
+            svg.appendChild(countryText);
+        });
+    }
+
+    function showCharacterInfo(node) {
+        const infoPanel = document.getElementById('character-info');
+        if (!infoPanel) return;
+        
+        // Get icon based on character
+        let icon = 'fa-crown';
+        if (node.id === 'saladin') icon = 'fa-mosque';
+        if (node.id === 'frederick') icon = 'fa-chess-king';
+        if (node.id === 'philip') icon = 'fa-chess-queen';
+        if (node.id === 'richard') icon = 'fa-lion';
+        
+        infoPanel.innerHTML = `
+            <div class="text-center">
+                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background-color: ${node.color}">
+                    <i class="fas ${icon} text-white text-2xl"></i>
+                </div>
+                <h4 class="text-xl font-bold text-slate-800">${node.name}</h4>
+                <p class="text-slate-500 mb-4">${node.country}</p>
+                <p class="text-slate-600 text-sm leading-relaxed">${node.info}</p>
+            </div>
+        `;
+        
+        // Add animation
+        infoPanel.style.transform = 'scale(0.95)';
+        infoPanel.style.transition = 'transform 0.2s ease';
+        setTimeout(() => {
+            infoPanel.style.transform = 'scale(1)';
+        }, 100);
+        
+        // Highlight related connections
+        highlightConnections(node.id);
+    }
+
+    function highlightConnections(nodeId) {
+        // Reset all links
+        document.querySelectorAll('.network-link').forEach(link => {
+            link.setAttribute('opacity', '0.3');
+        });
+        
+        // Highlight connected links
+        networkData.links.forEach(link => {
+            if (link.source === nodeId || link.target === nodeId) {
+                const links = document.querySelectorAll('.network-link');
+                const linkIndex = networkData.links.indexOf(link);
+                if (links[linkIndex]) {
+                    links[linkIndex].setAttribute('opacity', '1');
+                    links[linkIndex].setAttribute('stroke-width', '5');
+                }
+            }
+        });
+        
+        // Reset after 3 seconds
+        setTimeout(() => {
+            document.querySelectorAll('.network-link').forEach(link => {
+                link.setAttribute('opacity', '0.7');
+                link.setAttribute('stroke-width', link.getAttribute('stroke-width').replace('5', '4'));
+            });
+        }, 3000);
+    }
+
+    // Initialize when DOM is loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeNetwork);
+    } else {
+        initializeNetwork();
+    }
+    
+    // Reinitialize on window resize
+    window.addEventListener('resize', initializeNetwork);
+})();
+// 在这里添加（大约第530行左右，detailData对象之前）
+class TimelineNavigator {
+    constructor() {
+        this.currentIndex = 0;
+        this.totalItems = 14;
+        this.isPlaying = false;
+        this.playSpeed = 1;
+        this.playInterval = null;
+        
+        this.timelineData = [
+            { year: 1187, event: "Battle of Hattin", position: 0 },
+            { year: 1187, event: "Fall of Jerusalem", position: 8 },
+            { year: 1187, event: "Papal Call to Arms", position: 16 },
+            { year: 1189, event: "Frederick I Departs", position: 24 },
+            { year: 1189, event: "Richard I Crowned", position: 32 },
+            { year: 1190, event: "Frederick I Dies", position: 40 },
+            { year: 1190, event: "Kings Depart for East", position: 48 },
+            { year: 1191, event: "Cyprus Conquered", position: 56 },
+            { year: 1191, event: "Siege of Acre Won", position: 64 },
+            { year: 1191, event: "Philip II Returns", position: 72 },
+            { year: 1191, event: "Battle of Arsuf", position: 80 },
+            { year: 1192, event: "Advance on Jerusalem", position: 88 },
+            { year: 1192, event: "Treaty of Jaffa", position: 96 },
+            { year: 1192, event: "Richard I Returns", position: 100 }
+        ];
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.updateTimelineWidth();
+    }
+    
+    updateTimelineWidth() {
+        const container = document.querySelector('.timeline-container-horizontal');
+        const timeline = document.getElementById('timelineLine');
+        
+        if (container && timeline) {
+            const containerWidth = container.scrollWidth;
+            timeline.style.width = `${containerWidth - 100}px`;
+            timeline.style.left = '50px';
+        }
+    }
+    
+    setupEventListeners() {
+        // Timeline item clicks
+        document.querySelectorAll('.timeline-item-horizontal').forEach((item, index) => {
+            item.addEventListener('click', () => {
+                this.goToIndex(index);
+            });
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            this.handleKeyboard(e);
+        });
+    }
+    
+    handleKeyboard(e) {
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            this.goToPrevious();
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            this.goToNext();
+        } else if (e.key === ' ') {
+            e.preventDefault();
+            this.togglePlay();
+        }
+    }
+    
+    togglePlay() {
+        if (this.isPlaying) {
+            this.pause();
+        } else {
+            this.play();
+        }
+    }
+    
+    play() {
+        this.isPlaying = true;
+        const interval = 2000 / this.playSpeed;
+        
+        this.playInterval = setInterval(() => {
+            if (this.currentIndex < this.totalItems - 1) {
+                this.goToNext();
+            } else {
+                this.pause();
+                this.goToIndex(0);
+            }
+        }, interval);
+    }
+    
+    pause() {
+        this.isPlaying = false;
+        if (this.playInterval) {
+            clearInterval(this.playInterval);
+            this.playInterval = null;
+        }
+    }
+    
+    goToIndex(index) {
+        if (index < 0 || index >= this.totalItems) return;
+        this.currentIndex = index;
+        this.updateTimeline(index);
+    }
+    
+    goToNext() {
+        if (this.currentIndex < this.totalItems - 1) {
+            this.goToIndex(this.currentIndex + 1);
+        }
+    }
+    
+    goToPrevious() {
+        if (this.currentIndex > 0) {
+            this.goToIndex(this.currentIndex - 1);
+        }
+    }
+    
+    updateTimeline(index) {
+        const data = this.timelineData[index];
+        
+        // Update timeline items
+        document.querySelectorAll('.timeline-item-horizontal').forEach((item, i) => {
+            item.classList.toggle('active', i === index);
+        });
+        
+        // Smooth scroll to active item (horizontal)
+        const activeItem = document.querySelector('.timeline-item-horizontal.active');
+        if (activeItem) {
+            const container = document.getElementById('timelineContainer');
+            const containerRect = container.getBoundingClientRect();
+            const itemRect = activeItem.getBoundingClientRect();
+            
+            const scrollLeft = container.scrollLeft + itemRect.left - containerRect.left - (containerRect.width / 2) + (itemRect.width / 2);
+            
+            container.scrollTo({
+                left: scrollLeft,
+                behavior: 'smooth'
+            });
+        }
+    }
+}
+const detailData = {
+    'genoese-ships': {
+        title: "Genoese Merchant Ships - Information Network",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">Medieval Information Highway</h4>
+            <p>Genoese merchants played a crucial role as medieval Europe's information network. Their extensive trade routes connected the Eastern Mediterranean with Western Europe, making them ideal messengers for urgent news.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The Journey</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Route:</strong> From Jerusalem/Acre → Constantinople → Venice/Genoa → Rome</li>
+                <li><strong>Speed:</strong> Fastest communication method available in 1187</li>
+                <li><strong>Motivation:</strong> Economic interests - war affected their trade routes</li>
+                <li><strong>Credibility:</strong> First-hand witness accounts from the Holy Land</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Impact on Europe</h4>
+            <p>The news brought by these merchants was the first reliable information many Europeans had about the catastrophe. Unlike rumors or hearsay, merchant testimonies carried weight due to their economic stakes in the region.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Historical Context</h4>
+            <p>Genoa was one of the major maritime republics of medieval Italy. Their merchants had established trading posts throughout the Eastern Mediterranean and had witnessed the fall of Jerusalem firsthand.</p>
+        `
+    },
+    
+    'gregory-decision': {
+        title: "Pope Gregory VIII's Decision - Audita Tremendi",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The Papal Bull "Audita Tremendi"</h4>
+            <p>On October 29, 1187, Pope Gregory VIII issued the famous bull "Audita Tremendi" (Having Heard Terrible Things), calling for immediate mobilization of all Christendom to reclaim the Holy Land.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Key Provisions</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Full Indulgence:</strong> Complete remission of sins for all participants</li>
+                <li><strong>Financial Support:</strong> Introduction of the "Saladin Tithe" - 10% tax on income and movable property</li>
+                <li><strong>Legal Protection:</strong> Crusaders' property and families under Church protection</li>
+                <li><strong>Suspension of Conflicts:</strong> All European wars to cease during the Crusade</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Religious Framework</h4>
+            <p>Gregory VIII framed the loss of Jerusalem as divine punishment for Christian sins, particularly pride, luxury, and internal conflicts. The Crusade was presented as a path to redemption for all of Christendom.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Immediate Response</h4>
+            <p>The papal call had immediate effect across Europe. Within months, three major monarchs - Frederick Barbarossa, Richard I, and Philip II - had taken the cross, demonstrating the Pope's moral authority.</p>
+        `
+    },
+    
+    'historical-significance': {
+        title: "Historical Significance of the Papal Call",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">Unprecedented Unity</h4>
+            <p>The Third Crusade represented the largest coordinated effort in medieval European history, bringing together the Holy Roman Empire, England, and France under a common religious banner.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Political Implications</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li><strong>Temporary Peace:</strong> European conflicts suspended for the greater cause</li>
+                <li><strong>Resource Mobilization:</strong> Massive financial and military resources diverted eastward</li>
+                <li><strong>Papal Authority:</strong> Demonstrated the Pope's ability to influence secular rulers</li>
+                <li><strong>International Cooperation:</strong> Rare moment of medieval European unity</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Long-term Consequences</h4>
+            <p>The mobilization order established precedents for future papal calls to arms and demonstrated the power of religious motivation in medieval politics. It also showed the limits of such authority when political interests diverged.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Economic Impact</h4>
+            <p>The Saladin Tithe and other fundraising efforts significantly impacted European economies, with some regions experiencing financial strain that lasted for years after the Crusade's end.</p>
+        `
+    },
+
+    saladin: {
+        title: "Saladin's Strategic March - Detailed Analysis",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">Military Strategy</h4>
+            <p>Saladin's march was a masterpiece of medieval warfare strategy. He deliberately chose the summer of 1187 to launch his campaign, taking advantage of optimal weather conditions and troop morale.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Force Composition</h4>
+            <p>The 60,000-strong army included:</p>
+            <ul class="list-disc ml-6 mt-2">
+                <li>Kurdish and Turkish cavalry units</li>
+                <li>Ayyubid professional soldiers</li>
+                <li>Local militias from Syria and Egypt</li>
+                <li>Siege equipment and engineers</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Strategic Objectives</h4>
+            <p>Saladin's campaign had multiple objectives: weaken Crusader strongholds, control key trade routes, and ultimately recapture Jerusalem - the symbolic heart of the Crusader presence in the Holy Land.</p>
+        `
+    },
+    hattin: {
+        title: "The Battle of Hattin - Detailed Analysis",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">Battle Tactics</h4>
+            <p>The Battle of Hattin (July 4, 1187) was a tactical masterpiece that demonstrated Saladin's superior understanding of desert warfare and psychological strategy.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">The Trap</h4>
+            <p>Saladin deliberately besieged Tiberias to force the Crusader army to march across the arid Galilee hills. This forced march in extreme heat weakened the Crusader forces before battle even began.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Decisive Factors</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li>Superior numbers: 30,000 vs 20,000</li>
+                <li>Better knowledge of local terrain</li>
+                <li>Use of fire arrows and smoke</li>
+                <li>Control of water sources</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Aftermath</h4>
+            <p>The capture of the True Cross and King Guy of Jerusalem marked the beginning of the end for the Crusader states. This victory opened the path to Jerusalem's recapture.</p>
+        `
+    },
+    shock: {
+        title: "European Shock - Detailed Analysis",
+        content: `
+            <h4 class="text-lg font-bold text-slate-800 mb-2">The News Spreads</h4>
+            <p>News of Jerusalem's fall reached Europe through Genoese merchant networks, creating unprecedented panic across Christian kingdoms. The loss of Christianity's holiest site was seen as a divine punishment.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Papal Response</h4>
+            <p>Pope Gregory VIII issued the bull "Audita Tremendi" calling for immediate mobilization. The papal call emphasized the religious duty to reclaim the Holy Land and offered spiritual incentives.</p>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Political Implications</h4>
+            <ul class="list-disc ml-6 mt-2">
+                <li>Suspension of ongoing European conflicts</li>
+                <li>Massive financial commitments from monarchs</li>
+                <li>Formation of the "Saladin Tithe" - special tax for the Crusade</li>
+                <li>Diplomatic alliances between rival kingdoms</li>
+            </ul>
+            
+            <h4 class="text-lg font-bold text-slate-800 mb-2 mt-4">Social Impact</h4>
+            <p>The call for the Third Crusade created a religious fervor not seen since the First Crusade, with thousands of nobles, knights, and commoners taking the cross to join the expedition.</p>
+        `
+    }
+};
+
+function showDetailModal(type) {
+    const modal = document.getElementById('detailModal');
+    const title = document.getElementById('modalTitle');
+    const content = document.getElementById('modalContent');
+    
+    const data = detailData[type];
+    title.textContent = data.title;
+    content.innerHTML = data.content;
+    
+    modal.classList.remove('hidden');
+}
+
+function closeDetailModal() {
+    const modal = document.getElementById('detailModal');
+    modal.classList.add('hidden');
+}
+
+// 点击模态框外部关闭
+document.getElementById('detailModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDetailModal();
+    }
+});
+
+</script>
+<div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h3 id="modalTitle" class="text-3xl font-bold text-slate-800 pr-4"></h3>
+            <button onclick="closeDetailModal()" class="text-slate-500 hover:text-slate-700 flex-shrink-0">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <div id="modalContent" class="text-slate-600 space-y-4">
+            <!-- 内容将由JavaScript动态填充 -->
+        </div>
+        <div class="mt-8 text-center">
+            <button onclick="closeDetailModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
